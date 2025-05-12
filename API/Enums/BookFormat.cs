@@ -4,5 +4,5 @@ public enum BookFormat
 {
     Physical = 1,
     Digital = 2,
-    Audiobook = 3
+    Audiobook = 3,
 }
