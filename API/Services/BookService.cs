@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TBRly.API.DTOs;
 using TBRly.API.Models;
@@ -32,7 +33,7 @@ public class BookService
                 Review = book.Review,
             });
 
-    public Book? GetBookById(int id) => _repo.GetBookById(id);
+    public Book? GetBookByISBN(long ISBN) => _repo.GetBookByISBN(ISBN);
 
     public BookDto AddBook(BookDto book)
     {
@@ -40,9 +41,9 @@ public class BookService
         return MapToBookDto(_repo.AddBook(newBook));
     }
 
-    public void DeleteBook(int id) => _repo.DeleteBook(id);
+    public void DeleteBook(long ISBN) => _repo.DeleteBook(ISBN);
 
-    public Book? UpdateBook(int id, BookDto book)
+    public Book? UpdateBook(long ISBN, BookDto book)
     {
         var updatedBook = new Book
         {
@@ -58,8 +59,10 @@ public class BookService
             PageCount = book.PageCount,
             Review = book.Review,
         };
-        return _repo.UpdateBook(id, updatedBook);
+        return _repo.UpdateBook(ISBN, updatedBook);
     }
+
+    public List<Book> GetBooksByAuthor(string author) => _repo.GetBooksByAuthor(author);
 
     public Book MapToBook(BookDto bookDto)
     {

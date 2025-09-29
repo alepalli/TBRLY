@@ -1,37 +1,51 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using TBRly.API.Data;
 using TBRly.API.Models;
 
 namespace TBRly.API.Repositories;
 
 public class BookRepository : IBookRepository
 {
-    private readonly List<Book> _books = new();
-    private int _nextId = 1;
+    private readonly AppDbContext _context;
 
-    public List<Book> GetAllBooks() => _books;
+    public BookRepository(AppDbContext context)
+    {
+        _context = context;
+    }
 
-    public Book? GetBookById(int id) => _books.FirstOrDefault(b => b.Id == id);
+    // torna tutti i libri
+    public List<Book> GetAllBooks() => _context.Books.ToList();
 
+    // cerca un libro per ISBN
+    public Book? GetBookByISBN(long ISBN) => _context.Books.FirstOrDefault(b => b.ISBN == ISBN); //FirstOrDefault restituisce null se non trova nulla → per questo il compilatore vuole che tu dichiari Book? (cioè "Book o null").
+
+    // aggiunge un libro
     public Book AddBook(Book book)
     {
-        book.Id = _nextId++;
-        _books.Add(book);
+        _context.Books.Add(book);
+        _context.SaveChanges();
         return book;
     }
 
-    public void DeleteBook(int id)
+    // elimina un libro per ISBN
+    public void DeleteBook(long ISBN)
     {
-        var book = GetBookById(id);
+        var book = GetBookByISBN(ISBN);
+        // Console.WriteLine(book == null ? "non trovato" : $"trovato {book.Title} {book.ISBN}");
         if (book != null)
         {
-            _books.Remove(book);
+            _context.Books.Remove(book);
+            _context.SaveChanges(); // salva le modifiche al database
         }
     }
 
-    public Book? UpdateBook(int id, Book updatedBook)
+    // aggiorna un libro tramite ISBN
+    public Book? UpdateBook(long ISBN, Book updatedBook)
     {
-        var book = GetBookById(id);
+        var book = GetBookByISBN(ISBN);
         if (book != null)
         {
             book.Title = updatedBook.Title;
@@ -46,17 +60,19 @@ public class BookRepository : IBookRepository
             book.Description = updatedBook.Description;
             book.CoverImageUrl = updatedBook.CoverImageUrl;
             book.Format = updatedBook.Format;
-            return book;
+            Console.WriteLine($"Aggiornato libro {book.Title} con ISBN {book.ISBN}");
+            _context.Books.Update(book);
+            _context.SaveChanges();
         }
-        return null;
+        return book;
     }
 
+    // cerca libri per autore (case insensitive)
     public List<Book> GetBooksByAuthor(string author)
     {
-        return _books
-            .Where(b => b.Author.Equals(author, System.StringComparison.OrdinalIgnoreCase))
-            .ToList()
-        ;
+        Console.WriteLine($"Cercando libri di autore: {author}");
+        // return _context.Books.Where(b => b.Author.ToLower().Contains(author.ToLower())).ToList();
+        return _context.Books.Where(b => EF.Functions.Like(b.Author, $"%{author}%")).ToList();
     }
 
     public List<Book> GetBooksByGenre(string genre)
@@ -75,11 +91,6 @@ public class BookRepository : IBookRepository
     }
 
     public List<Book> GetBooksByFormat(string format)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public List<Book> GetBooksByISBN(string isbn)
     {
         throw new System.NotImplementedException();
     }

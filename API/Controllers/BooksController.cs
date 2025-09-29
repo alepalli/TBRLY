@@ -5,7 +5,8 @@ using TBRly.API.Services;
 namespace TBRly.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/[controller]")] // significa che il percorso base è api/books
+// [controller] prende il nome della classe senza il suffisso Controller.
 public class BooksController : ControllerBase
 {
     private readonly BookService _bookService;
@@ -16,12 +17,12 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetAll() => Ok(_bookService.GetAllBooks());
+    public IActionResult GetAllBooks() => Ok(_bookService.GetAllBooks());
 
-    [HttpGet("{id}")]
-    public IActionResult GetById(int id)
+    [HttpGet("{ISBN}")]
+    public IActionResult GetBookByISBN(long ISBN)
     {
-        var book = _bookService.GetBookById(id);
+        var book = _bookService.GetBookByISBN(ISBN);
         if (book == null)
         {
             return NotFound();
@@ -30,27 +31,38 @@ public class BooksController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Add(BookDto book)
+    public IActionResult AddBook(BookDto book)
     {
         var newBook = _bookService.AddBook(book);
-        return CreatedAtAction(nameof(GetById), new { id = newBook.Id }, newBook);
+        return CreatedAtAction(nameof(GetBookByISBN), new { ISBN = newBook.ISBN }, newBook);
     }
 
-    [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    [HttpDelete("{ISBN}")]
+    public IActionResult DeleteBook(long ISBN)
     {
-        _bookService.DeleteBook(id);
-        return NoContent();
+        _bookService.DeleteBook(ISBN);
+        return Ok("Libro eliminato con successo");
     }
 
-    [HttpPut("{id}")]
-    public IActionResult Update(int id, BookDto book)
+    [HttpPut("{ISBN}")]
+    public IActionResult UpdateBook(long ISBN, BookDto book)
     {
-        var updatedBook = _bookService.UpdateBook(id, book);
+        var updatedBook = _bookService.UpdateBook(ISBN, book);
         if (updatedBook == null)
         {
             return NotFound();
         }
         return Ok(updatedBook);
+    }
+
+    [HttpGet("author/{author}")]
+    public IActionResult GetBooksByAuthor(string author)
+    {
+        var books = _bookService.GetBooksByAuthor(author);
+        if (books == null || books.Count == 0)
+        {
+            return NotFound();
+        }
+        return Ok(books);
     }
 }
