@@ -5,7 +5,7 @@ namespace TBRly.API.Models;
 public class Book
 {
     public int Id { get; set; }
-    public string Title { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty; // valorizzare una stringa vuota
     public string Author { get; set; } = string.Empty;
     public BookFormat Format { get; set; }
     public BookStatus Status { get; set; }

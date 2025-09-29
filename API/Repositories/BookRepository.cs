@@ -53,7 +53,10 @@ public class BookRepository : IBookRepository
 
     public List<Book> GetBooksByAuthor(string author)
     {
-        throw new System.NotImplementedException();
+        return _books
+            .Where(b => b.Author.Equals(author, System.StringComparison.OrdinalIgnoreCase))
+            .ToList()
+        ;
     }
 
     public List<Book> GetBooksByGenre(string genre)
