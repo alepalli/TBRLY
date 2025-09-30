@@ -60,7 +60,6 @@ public class BookRepository : IBookRepository
             book.Description = updatedBook.Description;
             book.CoverImageUrl = updatedBook.CoverImageUrl;
             book.Format = updatedBook.Format;
-            Console.WriteLine($"Aggiornato libro {book.Title} con ISBN {book.ISBN}");
             _context.Books.Update(book);
             _context.SaveChanges();
         }
@@ -70,33 +69,38 @@ public class BookRepository : IBookRepository
     // cerca libri per autore (case insensitive)
     public List<Book> GetBooksByAuthor(string author)
     {
-        Console.WriteLine($"Cercando libri di autore: {author}");
         // return _context.Books.Where(b => b.Author.ToLower().Contains(author.ToLower())).ToList();
-        return _context.Books.Where(b => EF.Functions.Like(b.Author, $"%{author}%")).ToList();
+        return _context.Books.Where(b => EF.Functions.Like(b.Author, $"%{author}%")).ToList(); // altro modo per fare una ricerca case insensitive
     }
 
-    public List<Book> GetBooksByGenre(string genre)
+    // cerca libri per genere tramite l'enum BookGenre
+    public List<Book> GetBooksByGenre(int genre)
     {
-        throw new System.NotImplementedException();
+        return _context.Books.Where(b => (int)b.Genre == genre).ToList();
     }
 
-    public List<Book> GetBooksByLanguage(string language)
+    // cerca libri per lingua tramite l'enum BookLanguage
+    public List<Book> GetBooksByLanguage(int language)
     {
-        throw new System.NotImplementedException();
+        return _context.Books.Where(b => (int)b.Language == language).ToList();
     }
 
-    public List<Book> GetBooksByStatus(string status)
+    // cerca libri per stato tramite l'enum BookStatus
+
+    public List<Book> GetBooksByStatus(int status)
     {
-        throw new System.NotImplementedException();
+        return _context.Books.Where(b => (int)b.Status == status).ToList();
     }
 
-    public List<Book> GetBooksByFormat(string format)
+    // cerca libri per formato tramite enum BookFormat
+    public List<Book> GetBooksByFormat(int format)
     {
-        throw new System.NotImplementedException();
+        return _context.Books.Where(b => (int)b.Format == format).ToList();
     }
 
+    // cerca libri per titolo (case insensitive)
     public List<Book> GetBooksByTitle(string title)
     {
-        throw new System.NotImplementedException();
+        return _context.Books.Where(b => EF.Functions.Like(b.Title, $"%{title}%")).ToList();
     }
 }

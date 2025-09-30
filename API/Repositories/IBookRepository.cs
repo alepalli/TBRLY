@@ -11,9 +11,9 @@ public interface IBookRepository
     void DeleteBook(long ISBN);
     Book? UpdateBook(long ISBN, Book book);
     List<Book> GetBooksByAuthor(string author);
-    List<Book> GetBooksByGenre(string genre);
-    List<Book> GetBooksByLanguage(string language);
-    List<Book> GetBooksByStatus(string status);
-    List<Book> GetBooksByFormat(string format);
+    List<Book> GetBooksByGenre(int genre);
+    List<Book> GetBooksByLanguage(int language);
+    List<Book> GetBooksByStatus(int status);
+    List<Book> GetBooksByFormat(int format);
     List<Book> GetBooksByTitle(string title);
 }

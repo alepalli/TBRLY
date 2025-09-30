@@ -65,4 +65,60 @@ public class BooksController : ControllerBase
         }
         return Ok(books);
     }
+
+    [HttpGet("genre/{genre}")]
+    public IActionResult GetBooksByGenre(int genre)
+    {
+        var books = _bookService.GetBooksByGenre(genre);
+        if (books == null || books.Count == 0)
+        {
+            return NotFound();
+        }
+        return Ok(books);
+    }
+
+    [HttpGet("language/{language}")]
+    public IActionResult GetBooksByLanguage(int language)
+    {
+        var books = _bookService.GetBooksByLanguage(language);
+        if (books == null || books.Count == 0)
+        {
+            return NotFound();
+        }
+        return Ok(books);
+    }
+
+    [HttpGet("status/{status}")]
+    public IActionResult GetBooksByStatus(int status)
+    {
+        var books = _bookService.GetBooksByStatus(status);
+        if (books == null || books.Count == 0)
+        {
+            return NotFound();
+        }
+        return Ok(books);
+    }
+
+    [HttpGet("format/{format}")]
+    public IActionResult GetBooksByFormat(int format)
+    {
+        var books = _bookService.GetBooksByFormat(format);
+        if (books == null || books.Count == 0)
+        {
+            return NotFound();
+        }
+        return Ok(books);
+    }
+
+    [HttpGet("title/{title}")]
+    public IActionResult GetBooksByTitle(string title)
+    {
+        var books = _bookService.GetBooksByTitle(title);
+        if (books == null || books.Count == 0)
+        {
+            return NotFound();
+        }
+        return Ok(books);
+    }
+
 }

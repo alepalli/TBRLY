@@ -64,6 +64,16 @@ public class BookService
 
     public List<Book> GetBooksByAuthor(string author) => _repo.GetBooksByAuthor(author);
 
+    public List<Book> GetBooksByGenre(int genre) => _repo.GetBooksByGenre(genre);
+
+    public List<Book> GetBooksByLanguage(int language) => _repo.GetBooksByLanguage(language);
+
+    public List<Book> GetBooksByStatus(int status) => _repo.GetBooksByStatus(status);
+
+    public List<Book> GetBooksByFormat(int format) => _repo.GetBooksByFormat(format);
+
+    public List<Book> GetBooksByTitle(string title) => _repo.GetBooksByTitle(title);
+
     public Book MapToBook(BookDto bookDto)
     {
         return new Book
