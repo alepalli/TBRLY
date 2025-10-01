@@ -1,6 +1,7 @@
 # Build Folders
 bin/
 obj/
+Migrations/
 
 # User-specific files
 *.user
@@ -58,3 +59,4 @@ _ReSharper*/
 
 # Azure DevOps
 .env
+API/Migrations/AppDbContextModelSnapshot.cs

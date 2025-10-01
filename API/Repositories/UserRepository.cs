@@ -44,13 +44,7 @@ public class UserRepository : IUserRepository
     public User? UpdateUser(User user)
     {
         // Aggiorna i campi dell'utente esistente
-        user.Username = user.Username;
-        user.Email = user.Email;
-        user.BirthDate = user.BirthDate;
-        user.Role = user.Role;
-        user.ProfilePictureUrl = user.ProfilePictureUrl;
-        user.UpdatedAt = DateTime.UtcNow; // Aggiorna la data di aggiornamento
-        user.Bio = user.Bio;
+        _context.Users.Update(user);
 
         _context.SaveChanges(); // Salva le modifiche al database
         return user; // Ritorna l'utente aggiornato

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
 using TBRly.API.DTOs;
 using TBRly.API.Models;
 using TBRly.API.Repositories;
@@ -9,10 +10,12 @@ namespace TBRly.API.Services;
 public class UserService
 {
     private readonly IUserRepository _repo;
+    private readonly PasswordHasher<User> _passwordHasher;
 
     public UserService(IUserRepository repo)
     {
         _repo = repo; // Inietta il repository
+        _passwordHasher = new PasswordHasher<User>();
     }
 
     public List<UserDto> GetAllUsers() => _repo.GetAllUsers().ConvertAll(MapToUserDto);
@@ -20,6 +23,8 @@ public class UserService
     public UserDto AddUser(UserDto user)
     {
         var newUser = MapToUser(user);
+        newUser.Password = _passwordHasher.HashPassword(newUser, user.Password); // Hash della password
+        Console.WriteLine($"Hashed Password: {newUser.Password}"); // Debug: stampa l'hash della password
         return MapToUserDto(_repo.AddUser(newUser));
     }
 
@@ -44,10 +49,15 @@ public class UserService
         {
             existingUser.Email = userUpdate.Email;
         }
-        if (userUpdate.BirthDate.HasValue)
+        Console.WriteLine(userUpdate.Password);
+        if (userUpdate.Password != null)
         {
-            existingUser.BirthDate = userUpdate.BirthDate.Value;
+            existingUser.Password = _passwordHasher.HashPassword(existingUser, userUpdate.Password);
         }
+        if (userUpdate.BirthDate.HasValue)
+            {
+                existingUser.BirthDate = userUpdate.BirthDate.Value;
+            }
         if (userUpdate.Role.HasValue)
         {
             existingUser.Role = userUpdate.Role.Value;
@@ -93,5 +103,4 @@ public class UserService
             UpdatedAt = user.UpdatedAt,
             Bio = user.Bio,
         };
-
 }
