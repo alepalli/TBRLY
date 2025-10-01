@@ -17,7 +17,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetAllBooks() => Ok(_bookService.GetAllBooks());
+    public IActionResult GetAllBooks() => Ok(_bookService.GetAllBooks()); // IactionResult è il tipo di ritorno standard per i controller
 
     [HttpGet("{ISBN}")]
     public IActionResult GetBookByISBN(long ISBN)
@@ -120,5 +120,4 @@ public class BooksController : ControllerBase
         }
         return Ok(books);
     }
-
 }

@@ -1,4 +1,4 @@
-namespace  TBRly.API.Enums;
+namespace TBRly.API.Enums;
 
 public enum UserRole
 {

@@ -39,7 +39,6 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.Migrate();
 }
 
-
 // Abilita Swagger per la documentazione e l'interfaccia utente
 if (app.Environment.IsDevelopment())
 {

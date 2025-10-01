@@ -27,4 +27,32 @@ public class UserRepository : IUserRepository
         return user;
     }
 
+    // cerca un utente per id
+    public User? GetUserById(long id) => _context.Users.FirstOrDefault(u => u.Id == id); // cerca un utente per id
+
+    // elimina un utente per id
+    public void DeleteUser(long id)
+    {
+        var user = GetUserById(id);
+        if (user != null)
+        {
+            _context.Users.Remove(user);
+            _context.SaveChanges();
+        }
+    }
+
+    public User? UpdateUser(User user)
+    {
+        // Aggiorna i campi dell'utente esistente
+        user.Username = user.Username;
+        user.Email = user.Email;
+        user.BirthDate = user.BirthDate;
+        user.Role = user.Role;
+        user.ProfilePictureUrl = user.ProfilePictureUrl;
+        user.UpdatedAt = DateTime.UtcNow; // Aggiorna la data di aggiornamento
+        user.Bio = user.Bio;
+
+        _context.SaveChanges(); // Salva le modifiche al database
+        return user; // Ritorna l'utente aggiornato
+    }
 }
