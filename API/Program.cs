@@ -1,11 +1,15 @@
+using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using TBRly.API.Data;
 using TBRly.API.Repositories;
 using TBRly.API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using TBRly.API.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +28,27 @@ builder.Services.AddScoped<BookService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<UserService>();
+
+builder.Services.AddScoped<IJwtService, JwtService>(); // registra il servizio JWT
+
+// Aggiungi il servizio JWT
+builder
+    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+            ),
+        };
+    });
 
 // Aggiungi il supporto per la documentazione Swagger (opzionale, utile per testare le API)
 builder.Services.AddEndpointsApiExplorer();
@@ -47,8 +72,12 @@ if (app.Environment.IsDevelopment())
 }
 
 // Abilita il supporto per il routing e i controller
-app.UseRouting();
+// app.UseRouting(); non serve quando uso mapControllers
 app.MapControllers();
+
+// Abilita l'autenticazione e l'autorizzazione
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Avvia l'applicazione
 app.Run();

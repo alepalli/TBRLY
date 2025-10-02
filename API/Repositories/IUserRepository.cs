@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using TBRly.API.DTOs;
 using TBRly.API.Models;
 
 namespace TBRly.API.Repositories;

@@ -1,5 +1,8 @@
 using System;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TBRly.API.Data;
 using TBRly.API.DTOs;
 using TBRly.API.Services;
 
@@ -59,5 +62,21 @@ public class UsersController : ControllerBase
             return NotFound();
         }
         return Ok(updatedUser);
+    }
+
+    // login
+    [HttpPost("login")]
+    public IActionResult Login(LoginDto loginDto)
+    {
+        Console.WriteLine($"Tentativo di login per l'utente: {loginDto.Username}");
+        try
+        {
+            var token = _userService.Login(loginDto);
+            return Ok(new { Token = token });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized("Username o password errati");
+        }
     }
 }

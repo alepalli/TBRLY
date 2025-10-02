@@ -11,11 +11,13 @@ public class UserService
 {
     private readonly IUserRepository _repo;
     private readonly PasswordHasher<User> _passwordHasher;
+    private readonly IJwtService _jwtService;
 
-    public UserService(IUserRepository repo)
+    public UserService(IUserRepository repo, IJwtService jwtService)
     {
         _repo = repo; // Inietta il repository
         _passwordHasher = new PasswordHasher<User>();
+        _jwtService = jwtService;
     }
 
     public List<UserDto> GetAllUsers() => _repo.GetAllUsers().ConvertAll(MapToUserDto);
@@ -23,8 +25,7 @@ public class UserService
     public UserDto AddUser(UserDto user)
     {
         var newUser = MapToUser(user);
-        newUser.Password = _passwordHasher.HashPassword(newUser, user.Password); // Hash della password
-        Console.WriteLine($"Hashed Password: {newUser.Password}"); // Debug: stampa l'hash della password
+        newUser.Password = _passwordHasher.HashPassword(newUser, newUser.Password); // Hash della password
         return MapToUserDto(_repo.AddUser(newUser));
     }
 
@@ -55,9 +56,9 @@ public class UserService
             existingUser.Password = _passwordHasher.HashPassword(existingUser, userUpdate.Password);
         }
         if (userUpdate.BirthDate.HasValue)
-            {
-                existingUser.BirthDate = userUpdate.BirthDate.Value;
-            }
+        {
+            existingUser.BirthDate = userUpdate.BirthDate.Value;
+        }
         if (userUpdate.Role.HasValue)
         {
             existingUser.Role = userUpdate.Role.Value;
@@ -76,6 +77,28 @@ public class UserService
         return _repo.UpdateUser(existingUser);
     }
 
+    public User? Autheticate(string username, string password)
+    {
+        var user = _repo.GetAllUsers().Find(u => u.Username == username); // Cerca l'utente per username
+        if (user == null)
+        {
+            return null; // Utente non trovato
+        }
+        var result = _passwordHasher.VerifyHashedPassword(user, user.Password, password); // Verifica la password
+        return result == PasswordVerificationResult.Success ? user : null; // Ritorna l'utente se la password è corretta, altrimenti null
+    }
+
+    public string Login(LoginDto loginDto)
+    {
+        var user = Autheticate(loginDto.Username, loginDto.Password);
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("Username o password errati");
+        }
+        return _jwtService.GenerateJwtToken(user); // Genera e ritorna nella stessa riga il token JWT
+    }
+
+    // Mappa UserDto a User
     public User MapToUser(UserDto user) =>
         new User
         {
@@ -90,6 +113,7 @@ public class UserService
             Bio = user.Bio,
         };
 
+    // Mappa User a UserDto
     public UserDto MapToUserDto(User user) =>
         new UserDto
         {
