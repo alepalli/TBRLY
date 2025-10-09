@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -6,10 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using TBRly.API.Data;
+using TBRly.API.DTOs;
 using TBRly.API.Repositories;
 using TBRly.API.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using TBRly.API.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +50,24 @@ builder
         };
     });
 
+// Aggiungere il servizio CORS al container
+builder.Services.AddCors(options =>
+{
+    // Definiamo una politica chiamata "VueCorsPolicy"
+    options.AddPolicy(
+        name: "VueCorsPolicy",
+        policy =>
+        {
+            // 🛑 IMPORTANTE: Aggiungi l'origine del tuo frontend (sia HTTP che HTTPS)
+            policy
+                .WithOrigins("http://localhost:5173", "https://localhost:5173")
+                .AllowAnyHeader() // Permette di inviare headers (come il Token JWT)
+                .AllowAnyMethod(); // Permette tutti i metodi (GET, POST, OPTIONS, ecc.)
+        }
+    );
+});
+
+
 // Aggiungi il supporto per la documentazione Swagger (opzionale, utile per testare le API)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -70,6 +88,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// 🛑 IMPORTANTE: Abilita il middleware CORS e applica la politica definita
+// Deve essere chiamato PRIMA di UseRouting e UseAuthorization
+app.UseCors("VueCorsPolicy");
+app.UseHttpsRedirection();
 
 // Abilita il supporto per il routing e i controller
 // app.UseRouting(); non serve quando uso mapControllers
