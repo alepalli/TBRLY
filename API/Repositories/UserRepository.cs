@@ -47,6 +47,11 @@ public class UserRepository : IUserRepository
         return _context.Users.FirstOrDefault(u => u.Email == email);
     }
 
+    public User? GetUserByUsername(string username)
+    {
+        return _context.Users.FirstOrDefault(u => u.Username == username);
+    }
+
     // ... (AddUser rimane invariato, ma verrà chiamato solo dopo la validazione)
     public User AddUser(User user)
     {

@@ -12,4 +12,5 @@ public interface IUserRepository
     void DeleteUser(long id);
     User? UpdateUser(User user);
     User? GetUserByEmail(string email);
+    User? GetUserByUsername(string username);
 }

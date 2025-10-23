@@ -22,24 +22,36 @@ public class UserService
 
     public List<UserDto> GetAllUsers() => _repo.GetAllUsers().ConvertAll(MapToUserDto);
 
-    public UserDto AddUser(UserDto userDto) // Il tuo metodo "AddUser"
+    public UserDto AddUser(UserDto userDto)
     {
-        // 🛑 STEP 1: VERIFICA DI DUPLICAZIONE DELL'EMAIL (tramite il Repository)
-        var existingUser = _repo.GetUserByEmail(userDto.Email);
+        var errors = new List<string>();
 
-        if (existingUser != null)
+        // VERIFICA 1: EMAIL DUPLICATA
+        var existingEmailUser = _repo.GetUserByEmail(userDto.Email);
+        if (existingEmailUser != null)
         {
-            // Intercetta l'errore QUI, prima che il DB lo lanci (DbUpdateException)
-            throw new ArgumentException("L'indirizzo email è già registrato.");
+            errors.Add("L'indirizzo email è già registrato.");
         }
 
-        // Mappatura, Hashing e Salvataggio (la tua logica attuale)
+        // VERIFICA 2: USERNAME DUPLICATO
+        var existingUsernameUser = _repo.GetUserByUsername(userDto.Username);
+        if (existingUsernameUser != null)
+        {
+            errors.Add("Lo username è già in uso. Scegline un altro.");
+        }
+
+        // 🛑 PUNTO CRUCIALE: Se ci sono errori, lancia una singola stringa multi-linea.
+        if (errors.Count > 0)
+        {
+            // Usa Environment.NewLine, che si traduce in \r\n su Windows,
+            // ma viene comunque gestito dal browser come una separazione logica.
+            // Se \n non funziona, prova un separatore custom (vedi sotto).
+            throw new ArgumentException(string.Join(Environment.NewLine, errors));
+        }
+
+        // ... (restante logica: mappatura, hashing, salvataggio) ...
         var newUser = MapToUser(userDto);
-
-        // Esempio: _passwordHasher.HashPassword(newUser, newUser.Password);
         newUser.Password = _passwordHasher.HashPassword(newUser, newUser.Password);
-
-        // Esempio: Chiama il metodo AddUser del Repository (IUserRepository)
         return MapToUserDto(_repo.AddUser(newUser));
     }
 
