@@ -22,10 +22,24 @@ public class UserService
 
     public List<UserDto> GetAllUsers() => _repo.GetAllUsers().ConvertAll(MapToUserDto);
 
-    public UserDto AddUser(UserDto user)
+    public UserDto AddUser(UserDto userDto) // Il tuo metodo "AddUser"
     {
-        var newUser = MapToUser(user);
-        newUser.Password = _passwordHasher.HashPassword(newUser, newUser.Password); // Hash della password
+        // 🛑 STEP 1: VERIFICA DI DUPLICAZIONE DELL'EMAIL (tramite il Repository)
+        var existingUser = _repo.GetUserByEmail(userDto.Email);
+
+        if (existingUser != null)
+        {
+            // Intercetta l'errore QUI, prima che il DB lo lanci (DbUpdateException)
+            throw new ArgumentException("L'indirizzo email è già registrato.");
+        }
+
+        // Mappatura, Hashing e Salvataggio (la tua logica attuale)
+        var newUser = MapToUser(userDto);
+
+        // Esempio: _passwordHasher.HashPassword(newUser, newUser.Password);
+        newUser.Password = _passwordHasher.HashPassword(newUser, newUser.Password);
+
+        // Esempio: Chiama il metodo AddUser del Repository (IUserRepository)
         return MapToUserDto(_repo.AddUser(newUser));
     }
 
@@ -105,6 +119,7 @@ public class UserService
             Id = user.Id,
             Username = user.Username,
             Email = user.Email,
+            Password = user.Password,
             BirthDate = user.BirthDate,
             Role = user.Role,
             ProfilePictureUrl = user.ProfilePictureUrl,

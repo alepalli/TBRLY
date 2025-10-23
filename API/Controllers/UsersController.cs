@@ -11,14 +11,10 @@ namespace TBRly.API.Controllers;
 [ApiController]
 [Route("api/[controller]")] // significa che il percorso base è api/users
 // [controller] prende il nome della classe senza il suffisso Controller.
-public class UsersController : ControllerBase
+public class UsersController(UserService userService) : ControllerBase // Inietta il servizio tramite il costruttore
 {
-    private readonly UserService _userService;
-
-    public UsersController(UserService userService)
-    {
-        _userService = userService;
-    }
+    private readonly UserService _userService = userService;
+    private readonly IJwtService _jwtService;
 
     // torna tutti gli utenti
     [HttpGet]
@@ -28,8 +24,44 @@ public class UsersController : ControllerBase
     [HttpPost]
     public IActionResult AddUser(UserDto user)
     {
-        var newUser = _userService.AddUser(user);
-        return CreatedAtAction(nameof(GetAllUsers), new { id = 1 }, null); // Esempio di risposta
+        try
+        {
+            var newUser = _userService.AddUser(user);
+            var userModel = _userService.MapToUser(newUser); // Esempio
+            var token = _jwtService.GenerateJwtToken(userModel);
+            return StatusCode(
+                201,
+                new
+                {
+                    message = "Registrazione completata con successo",
+                    token = token,
+                    user = newUser,
+                }
+            );
+        }
+        catch (ArgumentException ex)
+        {
+            // Ritorna 400 Bad Request: Dettagliato è MEGLIO per il frontend
+            // (Il frontend ha bisogno di sapere il motivo per mostrarlo all'utente)
+            return BadRequest(
+                new
+                {
+                    message = ex.Message, // Messaggio: "L'indirizzo email è già registrato."
+                }
+            );
+        }
+        // GESTIONE DI ALTRI ERRORI INTERNI NON PREVISTI (es. problemi di hashing/DB)
+        catch (Exception)
+        {
+            // Ritorna 500 Internal Server Error: generico
+            return StatusCode(
+                500,
+                new
+                {
+                    message = "Si è verificato un errore interno durante la registrazione. Riprova più tardi.",
+                }
+            );
+        }
     }
 
     // cerca un utente per id

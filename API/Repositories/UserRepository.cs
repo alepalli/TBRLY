@@ -19,14 +19,6 @@ public class UserRepository : IUserRepository
     // torna tutti gli utenti
     public List<User> GetAllUsers() => _context.Users.ToList();
 
-    // aggiunge un nuovo utente
-    public User AddUser(User user)
-    {
-        _context.Users.Add(user);
-        _context.SaveChanges();
-        return user;
-    }
-
     // cerca un utente per id
     public User? GetUserById(long id) => _context.Users.FirstOrDefault(u => u.Id == id); // cerca un utente per id
 
@@ -48,5 +40,18 @@ public class UserRepository : IUserRepository
 
         _context.SaveChanges(); // Salva le modifiche al database
         return user; // Ritorna l'utente aggiornato
+    }
+
+    public User? GetUserByEmail(string email)
+    {
+        return _context.Users.FirstOrDefault(u => u.Email == email);
+    }
+
+    // ... (AddUser rimane invariato, ma verrà chiamato solo dopo la validazione)
+    public User AddUser(User user)
+    {
+        _context.Users.Add(user);
+        _context.SaveChanges(); // <-- La DbUpdateException avviene qui
+        return user;
     }
 }
