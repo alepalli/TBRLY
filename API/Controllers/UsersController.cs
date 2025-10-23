@@ -11,10 +11,10 @@ namespace TBRly.API.Controllers;
 [ApiController]
 [Route("api/[controller]")] // significa che il percorso base è api/users
 // [controller] prende il nome della classe senza il suffisso Controller.
-public class UsersController(UserService userService) : ControllerBase // Inietta il servizio tramite il costruttore
+public class UsersController(UserService userService, IJwtService jwtService) : ControllerBase // Inietta il servizio tramite il costruttore
 {
     private readonly UserService _userService = userService;
-    private readonly IJwtService _jwtService;
+    private readonly IJwtService _jwtService = jwtService;
 
     // torna tutti gli utenti
     [HttpGet]
@@ -26,16 +26,23 @@ public class UsersController(UserService userService) : ControllerBase // Iniett
     {
         try
         {
-            var newUser = _userService.AddUser(user);
-            var userModel = _userService.MapToUser(newUser); // Esempio
-            var token = _jwtService.GenerateJwtToken(userModel);
+            // 1. 🛑 userEntity ORA È l'Entity User COMPLETA
+            var userEntity = _userService.AddUser(user);
+
+            // 2. 🛑 Genera il token USANDO L'ENTITY COMPLETA
+            // (Hai bisogno dell'ID, che è nell'Entity salvata)
+            var token = _jwtService.GenerateJwtToken(userEntity);
+
+            // 3. 🛑 Mappa al DTO SOLO PER LA RISPOSTA al frontend
+            var newUserDto = _userService.MapToUserDto(userEntity);
+
             return StatusCode(
                 201,
                 new
                 {
                     message = "Registrazione completata con successo",
                     token = token,
-                    user = newUser,
+                    user = newUserDto, // Invia il DTO sicuro, non l'Entity con l'hash
                 }
             );
         }

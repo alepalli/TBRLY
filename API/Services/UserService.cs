@@ -22,7 +22,7 @@ public class UserService
 
     public List<UserDto> GetAllUsers() => _repo.GetAllUsers().ConvertAll(MapToUserDto);
 
-    public UserDto AddUser(UserDto userDto)
+    public User AddUser(UserDto userDto)
     {
         var errors = new List<string>();
 
@@ -46,15 +46,14 @@ public class UserService
             // Usa Environment.NewLine, che si traduce in \r\n su Windows,
             // ma viene comunque gestito dal browser come una separazione logica.
             // Se \n non funziona, prova un separatore custom (vedi sotto).
-            throw new ArgumentException(string.Join(Environment.NewLine, errors));
+            throw new ArgumentException(string.Join("|||", errors));
         }
 
         // ... (restante logica: mappatura, hashing, salvataggio) ...
         var newUser = MapToUser(userDto);
         newUser.Password = _passwordHasher.HashPassword(newUser, newUser.Password);
-        return MapToUserDto(_repo.AddUser(newUser));
+        return _repo.AddUser(newUser);
     }
-
     public User? GetUserById(long id) => _repo.GetUserById(id);
 
     public void DeleteUser(long id) => _repo.DeleteUser(id);
